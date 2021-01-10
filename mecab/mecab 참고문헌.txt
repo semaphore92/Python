@@ -7,3 +7,16 @@ https://hong-yp-ml-records.tistory.com/91
 
 https://liveyourit.tistory.com/56
 
+
+
+#간단정리
+Mecab : 형태소 분석
+Word2Vec : Model 생성
+
+
+학습 과정
+
+1. 사용자 발화 값이 나열 되어 있는 .txt파일은 Line별로 가져다가 형태소 분석
+2. 결과 값은 배열로 저장 후 Word2Vec을 이용하여 Model 생성
+3. Model 가지고 npy.파일 생성
+# 실제 npy가지고 유사성 판별함
