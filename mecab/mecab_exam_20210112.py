@@ -17,10 +17,14 @@ print(out)
 # Word2Vec 모듈
 from gensim.models import Word2Vec, KeyedVectors
 
+import numpy as np
+
 #테스트
 training_data_path = "C:\github\python\mecab\TrainingData\\training_data_dialogflow.txt"
+raw_data_path = 'C:\github\python\mecab\TrainingData\\raw_data_dialogflow.txt'
 model_path = 'C:\github\python\mecab\TrainingData\\training_model'
 dialog_file = open(training_data_path, 'rt', encoding='utf-8')
+vector_size=300
 training_word_data = []
 
 ##### 형태소 분석 ######
@@ -51,7 +55,7 @@ while True:
 
         if temp:
             training_word_data.append(temp)
-            print(training_word_data)
+            #print(training_word_data)
     else:
         break
 
@@ -62,10 +66,46 @@ while True:
 #model = Word2Vec.load(model_path + '.model')
 
 #Model 생성
-#model = Word2Vec(training_data_path, size=300, window=3, min_count=1, workers=1)
+model = Word2Vec(training_data_path, size=300, window=3, min_count=1, workers=1)
 
 model.build_vocab(training_word_data, update=True)
 model.train(training_word_data, epochs=model.epochs, total_examples=model.corpus_count)
 
 model.save(model_path + '.model')
 ##### Word2Vec Model 생성 ###### 
+
+
+###### Pickle Data 생성 ########
+f = open(raw_data_path, 'rt', encoding='utf-8')
+raw_data = f.readlines()
+f.close()
+
+for item in raw_data:
+    featureVec = np.zeros((vector_size,), dtype="float32")
+    nwords = 0
+
+    tokenlist = mecab.pos(item)
+
+    for word in tokenlist:
+        try:
+            #token = word.split(',')[0].split('\t')
+            value = word[0]
+            tag = word[1].split('+')[0]
+
+            #if tag not in ['SS', 'SF']:
+            if tag in ["NNG", "NNP", "VA", "SN", "SL"]:#, "VV"]: 
+                try:			
+                    if value != 'EOS' and len(value) > 1:
+                        featureVec = np.add(featureVec, model.wv[value])
+                        print(featureVec)
+                        nwords = nwords + 1
+                except:
+                    #print('no voca: ', value)
+                    pass
+        except:
+            pass
+
+    if nwords > 0:
+        featureVec = np.divide(featureVec, nwords)
+
+################################
